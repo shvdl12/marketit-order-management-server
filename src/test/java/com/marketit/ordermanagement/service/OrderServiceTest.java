@@ -1,7 +1,9 @@
 package com.marketit.ordermanagement.service;
 
 import com.marketit.ordermanagement.common.model.OrderStatus;
-import com.marketit.ordermanagement.entity.*;
+import com.marketit.ordermanagement.entity.Item;
+import com.marketit.ordermanagement.entity.Member;
+import com.marketit.ordermanagement.entity.Order;
 import com.marketit.ordermanagement.exception.ApiException;
 import com.marketit.ordermanagement.exception.ErrorCode;
 import com.marketit.ordermanagement.model.dto.ItemDto;
@@ -10,9 +12,8 @@ import com.marketit.ordermanagement.model.dto.OrderItemDto;
 import com.marketit.ordermanagement.model.request.CompleteOrderRequest;
 import com.marketit.ordermanagement.model.request.CreateOrderItemRequest;
 import com.marketit.ordermanagement.model.request.CreateOrderRequest;
-import com.marketit.ordermanagement.repository.ItemRepository;
-import com.marketit.ordermanagement.repository.MemberRepository;
 import com.marketit.ordermanagement.repository.OrderRepository;
+import com.marketit.ordermanagement.util.TestUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -31,13 +32,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class OrderServiceTest {
     @Autowired
-    private MemberRepository memberRepository;
-    @Autowired
-    private ItemRepository itemRepository;
-    @Autowired
     private OrderRepository orderRepository;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private TestUtil testUtil;
 
     private Member member;
     private Item item;
@@ -45,9 +44,9 @@ public class OrderServiceTest {
 
     @BeforeAll
     public void set() {
-        member = createMember();
-        item = createItem();
-        order = createOrder();
+        member = testUtil.createMember();
+        item = testUtil.createItem();
+        order = testUtil.createOrder(member);
     }
 
     @Test
@@ -157,47 +156,6 @@ public class OrderServiceTest {
         validateOrderDto(orderDto);
     }
 
-    private Member createMember() {
-
-        Address address = Address.builder()
-                .street("서울 성동구 왕십리로 125")
-                .detail("패스트파이브 서울숲점 12F 마켓잇")
-                .zipCode("04766")
-                .build();
-
-        return memberRepository.save(Member.builder()
-                .userId("test001")
-                .name("홍길동")
-                .email("test001@google.com")
-                .address(address)
-                .build());
-    }
-
-    private Item createItem() {
-        Item item = new Item("먹태깡", 2000, 10);
-        return itemRepository.save(item);
-    }
-
-    private Order createOrder() {
-
-        Order order = Order.builder()
-                .member(member)
-                .status(OrderStatus.ORDERED)
-                .build();
-
-        Item item = createItem();
-
-        OrderItem orderItem = OrderItem.builder()
-                .order(order)
-                .count(2)
-                .item(item)
-                .price(item.getPrice() * 2)
-                .build();
-
-        order.getOrderItems().add(orderItem);
-
-        return orderRepository.save(order);
-    }
 
     private void validateOrderDto(OrderDto orderDto) {
         assertThat(orderDto.getStatus()).isEqualTo(OrderStatus.ORDERED);

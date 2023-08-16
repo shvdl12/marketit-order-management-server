@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -12,8 +13,8 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateOrderItemRequest {
-    @NotNull
+    @NotNull(message = "Item ID is required")
     private Long itemId;
-    @NotNull
-    private Integer count;
+    @Min(value = 1, message = "Count must be at least 1")
+    private int count;
 }
