@@ -161,8 +161,8 @@ public class CreateOrderAPITest {
                     assertThat(orderDto.getStatus()).isEqualTo(OrderStatus.ORDERED);
                     assertThat(orderItemDto.getCount()).isEqualTo(orderCount);
                     assertThat(orderItemDto.getPrice()).isEqualTo(item.getPrice() * orderCount);
-                    assertThat(orderItemDto.getItem().getName()).isEqualTo("먹태깡");
-                    assertThat(orderItemDto.getItem().getPrice()).isEqualTo(2000);
+                    assertThat(orderItemDto.getItem().getName()).isEqualTo(item.getName());
+                    assertThat(orderItemDto.getItem().getPrice()).isEqualTo(item.getPrice());
                 });
     }
 

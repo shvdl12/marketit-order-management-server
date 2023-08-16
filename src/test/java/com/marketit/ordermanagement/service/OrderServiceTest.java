@@ -164,10 +164,10 @@ public class OrderServiceTest {
         OrderItemDto orderItemDto = orderDto.getOrderItem().get(0);
         ItemDto itemDto = orderItemDto.getItem();
 
-        assertThat(orderItemDto.getCount()).isEqualTo(2);
-        assertThat(orderItemDto.getPrice()).isEqualTo(4000);
-        assertThat(itemDto.getName()).isEqualTo("먹태깡");
-        assertThat(itemDto.getPrice()).isEqualTo(2000);
+        assertThat(orderItemDto.getCount()).isEqualTo(order.getOrderItems().get(0).getCount());
+        assertThat(orderItemDto.getPrice()).isEqualTo(order.getOrderItems().get(0).getPrice());
+        assertThat(itemDto.getName()).isEqualTo(item.getName());
+        assertThat(itemDto.getPrice()).isEqualTo(item.getPrice());
     }
 }
 

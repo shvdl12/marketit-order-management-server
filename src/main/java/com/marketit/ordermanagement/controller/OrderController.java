@@ -11,12 +11,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/order")
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+
+
+    @GetMapping("/list/{userId}")
+    public ResponseEntity<CommonResponse<List<OrderDto>>> getOrderList(@PathVariable String userId) {
+        List<OrderDto> orderDtoList = orderService.getOrderList(userId);
+        return ResponseEntity.ok(CommonResponse.ok(orderDtoList));
+    }
+
+    @GetMapping("/{userId}/{orderId}")
+    public ResponseEntity<CommonResponse<OrderDto>> getOrder(@PathVariable String userId, @PathVariable Long orderId) {
+        OrderDto orderDto = orderService.getOrder(orderId, userId);
+        return ResponseEntity.ok(CommonResponse.ok(orderDto));
+    }
 
     @PostMapping("/create")
     public ResponseEntity<CommonResponse<OrderDto>> createOrder(@Valid @RequestBody CreateOrderRequest request) {
@@ -28,11 +42,5 @@ public class OrderController {
     public ResponseEntity<CommonResponse> completeOrder(@Valid @RequestBody CompleteOrderRequest request) {
         orderService.orderComplete(request);
         return ResponseEntity.ok(CommonResponse.ok());
-    }
-
-    @GetMapping("/{userId}/{orderId}")
-    public ResponseEntity<CommonResponse<OrderDto>> getOrder(@PathVariable String userId, @PathVariable Long orderId) {
-        OrderDto orderDto = orderService.getOrder(orderId, userId);
-        return ResponseEntity.ok(CommonResponse.ok(orderDto));
     }
 }
