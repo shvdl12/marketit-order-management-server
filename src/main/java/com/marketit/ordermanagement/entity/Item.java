@@ -16,6 +16,7 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")
     private Long id;
+    @Column(length = 20)
     private String name;
     private int price;
     private int stock;
