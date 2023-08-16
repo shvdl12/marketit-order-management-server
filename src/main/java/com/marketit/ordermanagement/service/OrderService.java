@@ -32,9 +32,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderService {
     private final MemberRepository memberRepository;
-    private final ItemRepository itemRepository;
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
+    private final OrderItemService orderItemService;
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Transactional
@@ -43,7 +42,7 @@ public class OrderService {
         Order order = createOrder(createOrderRequest.getUserId());
 
         for (CreateOrderItemRequest itemRequest : createOrderRequest.getOrderItems()) {
-            OrderItem orderItem = createOrderItem(order, itemRequest);
+            OrderItem orderItem = orderItemService.createOrderItem(order, itemRequest);
             order.getOrderItems().add(orderItem);
         }
 
@@ -86,24 +85,6 @@ public class OrderService {
         return orderRepository.save(Order.builder()
                 .member(member)
                 .status(OrderStatus.ORDERED)
-                .build());
-    }
-
-    private OrderItem createOrderItem(Order order, CreateOrderItemRequest request) {
-        Item item = itemRepository.findById(request.getItemId())
-                .orElseThrow(() -> new ApiException(ErrorCode.ITEM_ID_NOT_FOUND, request.getItemId()));
-
-        if (item.hasStock(request.getCount())) {
-            item.minusStock(request.getCount());
-        } else {
-            throw new ApiException(ErrorCode.OUT_OF_STOCK, request.getItemId());
-        }
-
-        return orderItemRepository.save(OrderItem.builder()
-                .order(order)
-                .item(item)
-                .price(item.getPrice() * request.getCount())
-                .count(request.getCount())
                 .build());
     }
 

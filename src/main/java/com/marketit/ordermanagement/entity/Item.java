@@ -10,7 +10,6 @@ import javax.persistence.*;
 @Getter
 @Table(name = "items")
 @NoArgsConstructor
-@AllArgsConstructor
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
