@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @Table(name = "orders")
 @Getter
 @Builder
+@DynamicUpdate
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -39,4 +41,8 @@ public class Order {
 
     @CreatedDate
     private LocalDateTime orderDate;
+
+    public void updateOrderStatus(OrderStatus status) {
+        this.status = status;
+    }
 }

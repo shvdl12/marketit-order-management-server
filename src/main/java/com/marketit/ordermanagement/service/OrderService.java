@@ -8,6 +8,7 @@ import com.marketit.ordermanagement.entity.OrderItem;
 import com.marketit.ordermanagement.exception.ApiException;
 import com.marketit.ordermanagement.exception.ErrorCode;
 import com.marketit.ordermanagement.model.dto.OrderDto;
+import com.marketit.ordermanagement.model.request.CompleteOrderRequest;
 import com.marketit.ordermanagement.model.request.CreateOrderItemRequest;
 import com.marketit.ordermanagement.model.request.CreateOrderRequest;
 import com.marketit.ordermanagement.repository.ItemRepository;
@@ -39,6 +40,14 @@ public class OrderService {
         }
 
         return modelMapper.map(order, OrderDto.class);
+    }
+
+    @Transactional
+    public void orderComplete(CompleteOrderRequest completeOrderRequest) {
+        Order order = orderRepository.findById(completeOrderRequest.getOrderId())
+                .orElseThrow(() -> new ApiException(ErrorCode.ORDER_ID_NOT_FOUND, completeOrderRequest.getOrderId()));
+
+        order.updateOrderStatus(OrderStatus.COMPLETED);
     }
 
 
