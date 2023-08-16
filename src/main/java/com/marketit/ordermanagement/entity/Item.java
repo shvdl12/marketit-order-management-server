@@ -1,5 +1,6 @@
 package com.marketit.ordermanagement.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import javax.persistence.*;
 @Getter
 @Table(name = "items")
 @NoArgsConstructor
+@AllArgsConstructor
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,5 +24,13 @@ public class Item {
         this.name = name;
         this.price = price;
         this.stock = stock;
+    }
+
+    public void minusStock(int value) {
+        this.stock -= value;
+    }
+
+    public boolean hasStock(int requestCount) {
+        return this.stock >= requestCount;
     }
 }
