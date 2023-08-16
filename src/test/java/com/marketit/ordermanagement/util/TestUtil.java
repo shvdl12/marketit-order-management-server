@@ -27,7 +27,7 @@ public class TestUtil {
                 .build();
 
         return memberRepository.save(Member.builder()
-                .userId("test001")
+                .userId(String.valueOf(System.currentTimeMillis()))
                 .name("홍길동")
                 .email("test001@google.com")
                 .address(address)
