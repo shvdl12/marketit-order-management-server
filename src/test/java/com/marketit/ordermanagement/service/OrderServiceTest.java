@@ -1,13 +1,12 @@
 package com.marketit.ordermanagement.service;
 
 import com.marketit.ordermanagement.common.model.OrderStatus;
-import com.marketit.ordermanagement.entity.Address;
-import com.marketit.ordermanagement.entity.Item;
-import com.marketit.ordermanagement.entity.Member;
-import com.marketit.ordermanagement.entity.Order;
+import com.marketit.ordermanagement.entity.*;
 import com.marketit.ordermanagement.exception.ApiException;
 import com.marketit.ordermanagement.exception.ErrorCode;
+import com.marketit.ordermanagement.model.dto.ItemDto;
 import com.marketit.ordermanagement.model.dto.OrderDto;
+import com.marketit.ordermanagement.model.dto.OrderItemDto;
 import com.marketit.ordermanagement.model.request.CompleteOrderRequest;
 import com.marketit.ordermanagement.model.request.CreateOrderItemRequest;
 import com.marketit.ordermanagement.model.request.CreateOrderRequest;
@@ -125,7 +124,6 @@ public class OrderServiceTest {
     @Test
     public void complete_order_order_id_not_found() {
         CompleteOrderRequest request = new CompleteOrderRequest(-1L);
-        orderService.orderComplete(request);
 
         ApiException exception = assertThrows(ApiException.class,
                 () -> orderService.orderComplete(request));
@@ -133,7 +131,30 @@ public class OrderServiceTest {
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ORDER_ID_NOT_FOUND);
     }
 
+    @Test
+    public void get_order_correctly() {
+        OrderDto orderDto = orderService.getOrder(order.getId(), member.getUserId());
 
+        assertThat(orderDto.getStatus()).isEqualTo(OrderStatus.ORDERED);
+        assertThat(orderDto.getOrderItem()).isNotEmpty();
+
+        OrderItemDto orderItemDto = orderDto.getOrderItem().get(0);
+        ItemDto itemDto = orderItemDto.getItem();
+
+        assertThat(orderItemDto.getCount()).isEqualTo(2);
+        assertThat(orderItemDto.getPrice()).isEqualTo(4000);
+        assertThat(itemDto.getName()).isEqualTo("먹태깡");
+        assertThat(itemDto.getPrice()).isEqualTo(2000);
+    }
+
+    @Test
+    public void get_order_order_id_not_found() {
+
+        ApiException exception = assertThrows(ApiException.class,
+                () -> orderService.getOrder(-1L, member.getUserId()));
+
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ORDER_ID_NOT_FOUND);
+    }
 
 
     private Member createMember() {
@@ -158,10 +179,22 @@ public class OrderServiceTest {
     }
 
     private Order createOrder() {
+
         Order order = Order.builder()
                 .member(member)
                 .status(OrderStatus.ORDERED)
                 .build();
+
+        Item item = createItem();
+
+        OrderItem orderItem = OrderItem.builder()
+                .order(order)
+                .count(2)
+                .item(item)
+                .price(item.getPrice() * 2)
+                .build();
+
+        order.getOrderItems().add(orderItem);
 
         return orderRepository.save(order);
     }

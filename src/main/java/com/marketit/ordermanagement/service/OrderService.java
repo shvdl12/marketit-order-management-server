@@ -7,7 +7,9 @@ import com.marketit.ordermanagement.entity.Order;
 import com.marketit.ordermanagement.entity.OrderItem;
 import com.marketit.ordermanagement.exception.ApiException;
 import com.marketit.ordermanagement.exception.ErrorCode;
+import com.marketit.ordermanagement.model.dto.ItemDto;
 import com.marketit.ordermanagement.model.dto.OrderDto;
+import com.marketit.ordermanagement.model.dto.OrderItemDto;
 import com.marketit.ordermanagement.model.request.CompleteOrderRequest;
 import com.marketit.ordermanagement.model.request.CreateOrderItemRequest;
 import com.marketit.ordermanagement.model.request.CreateOrderRequest;
@@ -16,10 +18,15 @@ import com.marketit.ordermanagement.repository.MemberRepository;
 import com.marketit.ordermanagement.repository.OrderItemRepository;
 import com.marketit.ordermanagement.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -36,10 +43,10 @@ public class OrderService {
 
         for (CreateOrderItemRequest itemRequest : createOrderRequest.getOrderItems()) {
             OrderItem orderItem = createOrderItem(order, itemRequest);
-            orderItemRepository.save(orderItem);
+            order.getOrderItems().add(orderItem);
         }
 
-        return modelMapper.map(order, OrderDto.class);
+        return convertOrderDto(order);
     }
 
     @Transactional
@@ -48,6 +55,13 @@ public class OrderService {
                 .orElseThrow(() -> new ApiException(ErrorCode.ORDER_ID_NOT_FOUND, completeOrderRequest.getOrderId()));
 
         order.updateOrderStatus(OrderStatus.COMPLETED);
+    }
+
+    public OrderDto getOrder(Long orderId, String userId) {
+        Order order = orderRepository.findByIdAndMemberUserId(orderId, userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.ORDER_ID_NOT_FOUND, orderId));
+
+        return convertOrderDto(order);
     }
 
 
@@ -71,11 +85,27 @@ public class OrderService {
             throw new ApiException(ErrorCode.OUT_OF_STOCK, request.getItemId());
         }
 
-        return OrderItem.builder()
+        return orderItemRepository.save(OrderItem.builder()
                 .order(order)
                 .item(item)
                 .price(item.getPrice() * request.getCount())
                 .count(request.getCount())
-                .build();
+                .build());
+    }
+
+    private OrderDto convertOrderDto(Order order) {
+        OrderDto orderDto = modelMapper.map(order, OrderDto.class);
+
+        List<OrderItemDto> orderItemDtoList = order.getOrderItems().stream()
+                .map(orderItem -> {
+                    OrderItemDto orderItemDto = modelMapper.map(orderItem, OrderItemDto.class);
+                    orderItemDto.setItem(modelMapper.map(orderItem.getItem(), ItemDto.class));
+                    return orderItemDto;
+                })
+                .collect(Collectors.toList());
+
+        orderDto.setOrderItem(orderItemDtoList);
+
+        return orderDto;
     }
 }
