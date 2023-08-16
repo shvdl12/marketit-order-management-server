@@ -21,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -134,17 +135,7 @@ public class OrderServiceTest {
     @Test
     public void get_order_correctly() {
         OrderDto orderDto = orderService.getOrder(order.getId(), member.getUserId());
-
-        assertThat(orderDto.getStatus()).isEqualTo(OrderStatus.ORDERED);
-        assertThat(orderDto.getOrderItem()).isNotEmpty();
-
-        OrderItemDto orderItemDto = orderDto.getOrderItem().get(0);
-        ItemDto itemDto = orderItemDto.getItem();
-
-        assertThat(orderItemDto.getCount()).isEqualTo(2);
-        assertThat(orderItemDto.getPrice()).isEqualTo(4000);
-        assertThat(itemDto.getName()).isEqualTo("먹태깡");
-        assertThat(itemDto.getPrice()).isEqualTo(2000);
+        validateOrderDto(orderDto);
     }
 
     @Test
@@ -156,6 +147,15 @@ public class OrderServiceTest {
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ORDER_ID_NOT_FOUND);
     }
 
+    @Test
+    void get_order_list_correctly() {
+        List<OrderDto> orderDtoList = orderService.getOrderList(member.getUserId());
+
+        assertThat(orderDtoList).hasSize(1);
+
+        OrderDto orderDto = orderDtoList.get(0);
+        validateOrderDto(orderDto);
+    }
 
     private Member createMember() {
 
@@ -197,6 +197,19 @@ public class OrderServiceTest {
         order.getOrderItems().add(orderItem);
 
         return orderRepository.save(order);
+    }
+
+    private void validateOrderDto(OrderDto orderDto) {
+        assertThat(orderDto.getStatus()).isEqualTo(OrderStatus.ORDERED);
+        assertThat(orderDto.getOrderItem()).isNotEmpty();
+
+        OrderItemDto orderItemDto = orderDto.getOrderItem().get(0);
+        ItemDto itemDto = orderItemDto.getItem();
+
+        assertThat(orderItemDto.getCount()).isEqualTo(2);
+        assertThat(orderItemDto.getPrice()).isEqualTo(4000);
+        assertThat(itemDto.getName()).isEqualTo("먹태깡");
+        assertThat(itemDto.getPrice()).isEqualTo(2000);
     }
 }
 

@@ -23,6 +23,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,19 @@ public class OrderService {
                 .orElseThrow(() -> new ApiException(ErrorCode.ORDER_ID_NOT_FOUND, orderId));
 
         return convertOrderDto(order);
+    }
+
+    public List<OrderDto> getOrderList(String userId) {
+        List<Order> orders = orderRepository.findAllByMemberUserId(userId);
+
+        List<OrderDto> orderDtoList = new ArrayList<>();
+
+        for(Order order: orders) {
+            OrderDto orderDto = convertOrderDto(order);
+            orderDtoList.add(orderDto);
+        }
+
+        return orderDtoList;
     }
 
 
