@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-    private final MemberRepository memberRepository;
     private final OrderRepository orderRepository;
     private final OrderItemService orderItemService;
+    private final MemberService memberService;
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Transactional
@@ -79,8 +79,7 @@ public class OrderService {
 
 
     private Order createOrder(String userId) {
-        Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND, userId));
+        Member member = memberService.getMember(userId);
 
         return orderRepository.save(Order.builder()
                 .member(member)
