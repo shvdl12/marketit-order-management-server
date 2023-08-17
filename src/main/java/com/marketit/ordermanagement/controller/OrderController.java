@@ -26,38 +26,33 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
 
-
+    @Operation(summary = "주문 목록 조회", description = "유저의 ID를 입력 받아 해당 유저의 주문 리스트를 반환합니다.")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = FetchOrderListResponse.class)))
     @GetMapping(path = "/list/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "주문 목록 조회", description = "주문 목록 조회 API")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = FetchOrderListResponse.class)),
-            description = "유저의 ID를 입력 받아 해당 유저의 주문 리스트를 반환합니다.")
     public ResponseEntity<CommonResponse<List<OrderDto>>> getOrderList(@PathVariable String userId) {
         List<OrderDto> orderDtoList = orderService.getOrderList(userId);
         return ResponseEntity.ok(CommonResponse.ok(orderDtoList));
     }
 
+    @Operation(summary = "주문 조회", description = "유저의 ID와 주문 번호를 입력 받아 해당 주문 정보를 반환합니다.")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = FetchOrderResponse.class)))
     @GetMapping(path = "/{userId}/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "주문 조회", description = "주문 조회 API")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = FetchOrderResponse.class)),
-            description = "유저의 ID와 주문 번호를 입력 받아 해당 주문 정보를 반환합니다.")
     public ResponseEntity<CommonResponse<OrderDto>> getOrder(@PathVariable String userId, @PathVariable Long orderId) {
         OrderDto orderDto = orderService.getOrder(orderId, userId);
         return ResponseEntity.ok(CommonResponse.ok(orderDto));
     }
 
+    @Operation(summary = "주문 접수", description = "유저의 ID와 주문 정보를 입력 받아 주문을 생성하고 주문 정보를 반환합니다.")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = CreateOrderResponse.class)))
     @PostMapping(path = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "주문 접수", description = "주문 접수 API")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = CreateOrderResponse.class)),
-            description = "유저의 ID와 주문 정보를 입력 받아 주문을 생성하고 주문 정보를 반환합니다.")
     public ResponseEntity<CommonResponse<OrderDto>> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         OrderDto orderDto = orderService.order(request);
         return ResponseEntity.ok(CommonResponse.ok(orderDto));
     }
 
+    @Operation(summary = "주문 완료 처리", description = "주문 번호를 입력 받아 주문의 상태를 변경합니다.")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
     @PostMapping(path = "/complete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "주문 완료 처리", description = "주문 완료 처리 API")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = CommonResponse.class)),
-            description = "주문 번호를 입력 받아 주문의 상태를 변경합니다.")
     public ResponseEntity<CommonResponse> completeOrder(@Valid @RequestBody CompleteOrderRequest request) {
         orderService.orderComplete(request);
         return ResponseEntity.ok(CommonResponse.ok());
