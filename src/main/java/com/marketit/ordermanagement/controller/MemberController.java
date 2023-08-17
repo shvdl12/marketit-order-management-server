@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
     private final MemberService memberService;
 
-    @Operation(summary = "유저 조회", description = "테스트를 위한 유저 정보를 반환합니다.")
+    @Operation(summary = "유저 조회", description = "주문을 위한 유저 정보를 반환합니다.")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = FetchUserResponse.class)))
     @GetMapping(path = "/member", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<MemberDto>> getMember() {
